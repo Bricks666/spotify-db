@@ -1,30 +1,34 @@
-import { Tables } from "./types/Table";
-import { SpotifyDB } from "./lib/SpotifyDB";
+import { SpotifyDB } from "./lib/";
 const start = async () => {
-    const spotifyDb = new SpotifyDB({
-        user: "root",
-        password: "Root123",
-    });
+	const spotifyDb = new SpotifyDB({
+		user: "root",
+		password: "Root123",
+		checkDuplicate: false,
+	});
 
-    const { users: usersTable, authors: authorsTable } = spotifyDb;
+	try {
+		await spotifyDb.connect();
+		const users = await spotifyDb.users.getUsers({ page: 1, countOnPage: 10 });
+		console.log(users);
+		await spotifyDb.authors.addAuthor({ name: "asdasd" });
+		for (let i = 0; i < 500; i++) {
+			spotifyDb.musics.addMusic({
+				name: "I'm still standing",
+				authorId: 1,
+				durationSec: 120,
+			});
+		}
 
-    try {
-        await spotifyDb.connect();
-        console.log(spotifyDb);
-        const user = await usersTable.getUsers({ id: 1 });
-        console.log(user);
-        const users = await usersTable.getUsers({ id: [1, 2, 4, 5, 6, 7] });
-        console.log(users);
-        users.forEach((user) => console.log(user.id));
-        await authorsTable.addAuthor({ name: "Katy Perry" });
-        const authors = await authorsTable.getAuthors({ id: [1, 2, 3] });
-        console.log(authors[0].id, authors[0].name);
-        console.log(Tables["USERS"]);
-    } catch (e: any) {
-        console.log(e);
-    } finally {
-        spotifyDb.disconnect();
-    }
+		const music = await spotifyDb.musics.getMusics({
+			page: 1,
+			countOnPage: 150,
+		});
+		console.log(music);
+	} catch (e: any) {
+		console.log(e);
+	} finally {
+		spotifyDb.disconnect();
+	}
 };
 
 start();

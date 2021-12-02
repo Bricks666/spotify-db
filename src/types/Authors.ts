@@ -1,20 +1,22 @@
-import { Connection } from "mariadb";
+import { ITablePage } from "./Table";
+import { PoolConnection } from "mariadb";
 export interface IAuthor {
-    id: number;
-    name: string;
+	authorId: number;
+	name: string;
 }
 
 export interface IAuthorRequest {
-    id?: number | number[];
-    name?: string | string[];
+	authorId?: number | number[];
+	name?: string | string[];
 }
 export interface IAuthorCreateRequest {
-    name: string;
+	name: string;
 }
 
 export interface IAuthors {
-    init(connection: Connection): Promise<void>;
-    getAuthors(): Promise<IAuthor[]>;
-    getAuthors(filters: IAuthorRequest): Promise<IAuthor[]>;
-    addAuthor(author: IAuthorCreateRequest): Promise<void>;
+	init(connection: PoolConnection): Promise<void>;
+	getAuthors(): Promise<IAuthor[]>;
+	getAuthors(page: ITablePage): Promise<IAuthor[]>;
+	getAuthors(page: ITablePage, filters: IAuthorRequest): Promise<IAuthor[]>;
+	addAuthor(author: IAuthorCreateRequest): Promise<void>;
 }

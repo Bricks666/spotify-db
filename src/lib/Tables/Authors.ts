@@ -1,21 +1,20 @@
 import {
-	Tables,
 	IAuthors,
 	IAuthor,
 	IAuthorRequest,
 	IAuthorCreateRequest,
 	ITablePage,
 } from "../../types";
-import { Connection } from "mariadb";
+import { PoolConnection } from "mariadb";
 import { Table } from "./Table";
-import { authorsConfig } from "./configs";
+import { authorsConfig } from "../configs";
 
 export class Authors extends Table implements IAuthors {
 	public constructor() {
-		super(Tables.AUTHORS, authorsConfig);
+		super(authorsConfig);
 	}
 
-	public async init(connection: Connection) {
+	public async init(connection: PoolConnection | null) {
 		return await super.init(connection);
 	}
 

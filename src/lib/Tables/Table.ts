@@ -1,70 +1,80 @@
-import { Connection } from "mariadb";
+import { PoolConnection } from "mariadb";
+import { ITable, ITableConfig, ITablePage, ITableJoin } from "../../types";
 import {
-	ITable,
-	Tables,
-	ITableConfig,
-	ITablePage,
-	ITableJoin,
-} from "../../types";
-import { Services } from "../Services";
+	parseCreateTable,
+	toValidSQLKeys,
+	toValidSQLValues,
+	parseJoinTables,
+	toValidSQLWhere,
+	parseSetParams,
+} from "../Services";
 
 export class Table implements ITable {
-	private connection: Connection | null;
-	private readonly tableName: Tables;
+	private connection: PoolConnection | null;
 	private readonly config: ITableConfig;
 
-	public constructor(tableName: Tables, config: ITableConfig) {
-		this.tableName = tableName;
+	public constructor(config: ITableConfig) {
 		this.config = config;
 		this.connection = null;
 	}
 
-	public async init(connection: Connection) {
+	public async init(connection: PoolConnection | null) {
 		this.connection = connection;
-		const intiSQL: string = Services.parseCreateTable(
-			this.tableName,
-			this.config
-		);
-		await this.connection.query(intiSQL);
+		const intiSQL: string = parseCreateTable(this.config);
+		await this.connection!.query(intiSQL);
 	}
 
-	public async insertData<Response>(params: Response) {
-		const fields: string = Services.toValidSQLKeys(params);
-		const values: string = Services.toValidSQLValues(params);
+	public async insertData<Request extends Object>(params: Request) {
+		const fields: string = toValidSQLKeys(params);
+		const values: string = toValidSQLValues(params);
 		await this.connection?.query(
-			`INSERT ${this.tableName}(${fields}) VALUES(${values});`
+			`INSERT ${this.config.table}(${fields}) VALUES(${values});`
 		);
 	}
 
-	public async selectData<Response, InnerTable = {}, OuterTable = {}>(
+	public async selectData<Response>(
 		page: ITablePage = { page: 1, countOnPage: 100 },
 		filters?: Object,
-		join?: ITableJoin<InnerTable, OuterTable>
+		join?: ITableJoin[]
 	) {
 		let where: string = "";
 		let association: string = "";
 
-		if (filters !== undefined) {
-			where = Services.toValidSQLWhere(filters);
+		if (typeof filters !== "undefined") {
+			where = toValidSQLWhere(filters);
 		}
 
 		if (typeof join !== "undefined") {
-			association = Services.parseJoinTable<InnerTable, OuterTable>(join);
+			association = parseJoinTables(join);
 		}
 
 		const start = (page.page - 1) * page.countOnPage;
 		const end = page.page * page.countOnPage;
 
 		const response: Response[] = await this.connection?.query(
-			`SELECT * FROM ${this.tableName} ${where || ""} ${
-				association || ""
-			} LIMIT ${start}, ${end};`
+			`SELECT * FROM ${this.config.table} ${where} ${association} LIMIT ${start}, ${end};`
 		);
 
-		return Array.from(response) as Response[];
+		return Array.from(response);
 	}
 
-	public async deleteData() {}
+	public async deleteData<Filters extends Object>(filters: Filters) {
+		const where = toValidSQLWhere(filters);
+		await this.connection?.query(`DELETE FROM ${this.config.table} ${where};`);
+	}
 
-	public async updateData() {}
+	public async updateData<Values extends Object, Filters extends Object>(
+		newValues: Values,
+		filters?: Filters
+	) {
+		let where: string = "";
+		if (typeof filters !== "undefined") {
+			where = toValidSQLWhere(filters);
+		}
+
+		const update: string = parseSetParams(newValues);
+		await this.connection?.query(
+			`UPDATE ${this.config.table} SET ${update} ${where};`
+		);
+	}
 }

@@ -1,36 +1,66 @@
-import { ISpotifyDB, IUsers, IAuthors, IMusics } from "../types";
+import {
+	ISpotifyDB,
+	IUsers,
+	IAuthors,
+	IMusics,
+	IAlbums,
+	IPlaylists,
+	IMusicsToPlaylists,
+} from "../types";
 import mariadb, { Pool, PoolConfig, PoolConnection } from "mariadb";
-import { Users, Authors, Musics } from "./Tables";
+import {
+	Users,
+	Authors,
+	Musics,
+	Albums,
+	Playlists,
+	MusicsToPlaylists,
+} from "./Tables";
 
 export class SpotifyDB implements ISpotifyDB {
 	private readonly _pool: Pool;
-	private _connection: PoolConnection | any;
+	private _connection: PoolConnection | null;
 
 	public readonly users: IUsers;
 	public readonly authors: IAuthors;
 	public readonly musics: IMusics;
-	public readonly playlists: any;
-	public readonly albums: any;
+	public readonly albums: IAlbums;
+	public readonly playlists: IPlaylists;
+	public readonly musicsToPlaylists: IMusicsToPlaylists;
 
 	public constructor(poolConfig: PoolConfig) {
 		this._pool = mariadb.createPool({
 			...poolConfig,
-			initSql: "CREATE DATABASE IF NOT EXISTS Spotify;",
-			database: "Spotify",
+			initSql: ["CREATE DATABASE IF NOT EXISTS Spotify;", "USE Spotify;"],
 		});
+
 		this._connection = null;
+
 		this.users = new Users();
 		this.authors = new Authors();
 		this.musics = new Musics();
+		this.albums = new Albums();
+		this.playlists = new Playlists();
+		this.musicsToPlaylists = new MusicsToPlaylists();
 	}
 
 	public async connect() {
 		this._connection = await this._pool.getConnection();
-		const tables = [this.users, this.authors, this.musics];
 
-		tables.map((table) => table.init(this._connection));
+		const tables = [
+			this.users,
+			this.authors,
+			this.musics,
+			this.albums,
+			this.playlists,
+			this.musicsToPlaylists,
+		];
 
-		await Promise.all(tables);
+		if (typeof this._connection !== "undefined") {
+			tables.map((table) => table.init(this._connection));
+
+			await Promise.all(tables);
+		}
 	}
 
 	public disconnect(): void {

@@ -1,12 +1,12 @@
-import { Connection } from "mariadb";
-
-export type SQL = string;
+import { PoolConnection } from "mariadb";
 
 export enum Tables {
 	USERS = "users",
 	AUTHORS = "authors",
 	PLAYLISTS = "playlists",
 	MUSICS = "musics",
+	ALBUMS = "albums",
+	MUSIC_TO_PLAYLIST = "musicsToPlaylists",
 }
 
 export enum SQLTypes {
@@ -35,8 +35,9 @@ export interface IForeignKey {
 }
 
 export interface ITableConfig {
+	table: Tables;
 	safeCreating?: boolean;
-	fields?: IField[];
+	fields: IField[];
 	foreignKeys?: IForeignKey[];
 }
 export interface ITablePage {
@@ -50,28 +51,31 @@ export enum IJoinOperators {
 	MORE_THAN = ">",
 }
 
-export interface ITableJoin<InnerTable, OuterTable> {
+export interface ITableJoin {
 	outerTable: Tables;
 	innerTable: Tables;
-	expressions: IJoinExpression<InnerTable, OuterTable>[];
+	expressions: IJoinExpression[];
 }
-export interface IJoinExpression<InnerTable, OuterTable> {
-	innerField: keyof InnerTable;
+export interface IJoinExpression {
+	innerField: `${string}Id`;
 	operator: IJoinOperators;
-	outerField: keyof OuterTable;
+	outerField: `${string}Id`;
 }
 
 export interface ITable {
-	init(connection: Connection, tableConfig?: ITableConfig): Promise<void>;
-	insertData<Request>(params: Request): Promise<void>;
-	updateData(): Promise<void>;
-	deleteData(): Promise<void>;
+	init(connection: PoolConnection | null): Promise<void>;
+	insertData<Request extends Object>(params: Request): Promise<void>;
+	updateData<Values extends Object, Filters extends Object>(
+		newValues: Values,
+		filter?: Filters
+	): Promise<void>;
+	deleteData<Filters extends Object>(filter: Filters): Promise<void>;
 	selectData<Response>(): Promise<Response[]>;
 	selectData<Response>(page: ITablePage): Promise<Response[]>;
 	selectData<Response>(page: ITablePage, filters: Object): Promise<Response[]>;
-	selectData<Response, InnerTable, OuterTable>(
+	selectData<Response>(
 		page: ITablePage,
 		filters: Object,
-		join: ITableJoin<InnerTable, OuterTable>
+		join: ITableJoin[]
 	): Promise<Response[]>;
 }

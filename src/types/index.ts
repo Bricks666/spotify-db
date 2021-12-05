@@ -3,3 +3,7 @@ export * from "./Users";
 export * from "./Table";
 export * from "./Authors";
 export * from "./Musics";
+export * from "./Albums";
+export * from "./Playlists";
+export * from "./MusicsToPlaylists";
+export * from "./common";

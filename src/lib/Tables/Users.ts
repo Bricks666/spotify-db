@@ -1,40 +1,42 @@
-import { Connection } from "mariadb";
+import { PoolConnection } from "mariadb";
 import { Table } from "./Table";
 import {
 	IUsers,
 	IUser,
-	Tables,
 	IUserRequest,
 	IUserCreateRequest,
 	ITablePage,
+	IUserLoginRequest,
+	IUserChangeLoginRequest,
 } from "../../types";
-import { usersConfig } from "./configs";
+import { usersConfig } from "../configs";
 
 export class Users extends Table implements IUsers {
 	public constructor() {
-		super(Tables.USERS, usersConfig);
+		super(usersConfig);
 	}
 
-	public async init(connection: Connection) {
+	public async init(connection: PoolConnection | null) {
 		return await super.init(connection);
 	}
 
-	public async addUser(user: IUserCreateRequest): Promise<void> {
-		await this.insertData<IUserCreateRequest>(user);
+	public async addUser(user: IUserCreateRequest) {
+		await this.insertData(user);
 	}
 
-	public async getUsers(
-		page?: ITablePage,
-		filters?: IUserRequest
-	): Promise<IUser[]> {
-		if (typeof filters !== "undefined") {
-			return await this.selectData<IUser>(page, filters);
-		}
+	public async getUsers(page?: ITablePage, filters?: IUserRequest) {
 		return await this.selectData<IUser>(page, filters);
 	}
 
-	public async login(login: string, password: string): Promise<boolean> {
-		console.log(login, password);
-		return true;
+	public async changeLogin(changeLoginParams: IUserChangeLoginRequest) {
+		return await this.updateData<IUserRequest, IUserRequest>(
+			{ login: changeLoginParams.login },
+			{ userId: changeLoginParams.userId }
+		);
+	}
+
+	public async login(loginParams: IUserLoginRequest) {
+		const result = await this.selectData<IUser>(undefined, loginParams);
+		return result.length === 1;
 	}
 }

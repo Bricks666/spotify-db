@@ -7,6 +7,7 @@ import {
 	SQLTypes,
 	ITableJoin,
 	SQL,
+	RequestValues,
 } from "./../types";
 const toJSON = (values: string[]): string[] => {
 	return values.filter((s) => s !== "").map((el: string) => JSON.stringify(el));
@@ -15,7 +16,7 @@ const toJSON = (values: string[]): string[] => {
 const toString = <T extends Object>(
 	array: T[],
 	separator: string = ", "
-): string => {
+): string | SQL => {
 	return array.join(separator);
 };
 
@@ -23,28 +24,28 @@ export const toValidSQLValues = <T extends Object>(object: T): string => {
 	return toString(toJSON(Object.values(object)));
 };
 
-export function toValidSQLKeys<T extends Object>(object: T): string {
+export const toValidSQLKeys = <T extends Object>(object: T): string => {
 	return toString(Object.keys(object));
-}
+};
 
-export function toValidSQLWhere<T extends Object>(object: T): SQL {
+export const toValidSQLWhere = <T extends Object>(object: T): SQL => {
 	const keys: string[] = Object.keys(object);
-	const values: any[] = Object.values(object);
+	const values: RequestValues[] = Object.values(object);
 
 	const filtersArray: SQL[] = keys.map((key, i) => {
-		let filter: string = `${key} `;
-		let filterValue: SQL = "";
+		let filter: SQL = `${key} `;
+
 		if (Array.isArray(values[i])) {
-			filterValue = `IN (${toValidSQLValues(values[i])})`;
+			filter += `IN (${toValidSQLValues(values[i])})`;
 		} else {
-			filterValue = `= "${values[i].toString()}"`;
+			filter += `= "${values[i]}"`;
 		}
 
-		return filter + filterValue;
+		return filter;
 	});
 
 	return `WHERE ${toString(filtersArray, " AND ")}`;
-}
+};
 const parseTableField = (field: IField): SQL => {
 	let validField: SQL = `${field.name}`;
 
@@ -131,13 +132,13 @@ const parseJoinTable = (join: ITableJoin): SQL => {
 	return SQLScript;
 };
 
-export const parseJoinTables = (joins: ITableJoin[]): SQL => {
+export const parseJoinTables = (joins: ITableJoin[]): string => {
 	const SQLcommands: SQL[] = joins.map(parseJoinTable);
 
 	return toString(SQLcommands, " ");
 };
 
-export const parseSetParams = (params: Object): string => {
+export const parseSetParams = (params: Object): SQL => {
 	const keys: string[] = Object.keys(params);
 	const values: string[] = toJSON(Object.values(params));
 	const pairs: SQL[] = keys.map((key, i) => `${key} = ${values[i]}`);

@@ -1,4 +1,3 @@
-import { PoolConnection } from "mariadb";
 import {
 	Tables,
 	IMusics,
@@ -6,25 +5,26 @@ import {
 	IMusic,
 	ITablePage,
 	ITableJoin,
-	IJoinOperators,
+	JoinOperators,
 	IMusicJoin,
+	IMusicDeleteRequest,
+	IMusicChangeRequest,
 } from "./../../types/";
 import { musicsConfig } from "../configs";
 import { Table } from "./Table";
+import { logged } from "../decorators";
 
 export class Musics extends Table implements IMusics {
 	public constructor() {
 		super(musicsConfig);
 	}
 
-	public async init(connection: PoolConnection | null) {
-		return await super.init(connection);
-	}
-
+	@logged()
 	public async getMusics(page?: ITablePage, filters?: IMusicRequest) {
 		return await this.selectData<IMusic>(page, filters);
 	}
 
+	@logged()
 	public async getMusicsJoin(page?: ITablePage, filters?: IMusicRequest) {
 		const join: ITableJoin[] = [
 			{
@@ -33,7 +33,7 @@ export class Musics extends Table implements IMusics {
 				expressions: [
 					{
 						innerField: "authorId",
-						operator: IJoinOperators.EQUAL,
+						operator: JoinOperators.EQUAL,
 						outerField: "authorId",
 					},
 				],
@@ -45,7 +45,7 @@ export class Musics extends Table implements IMusics {
 					{
 						innerField: "albumId",
 						outerField: "albumId",
-						operator: IJoinOperators.EQUAL,
+						operator: JoinOperators.EQUAL,
 					},
 				],
 			},
@@ -55,5 +55,13 @@ export class Musics extends Table implements IMusics {
 
 	public async addMusic(music: IMusic) {
 		await this.insertData<IMusic>(music);
+	}
+
+	public async deleteMusics(filters: IMusicDeleteRequest) {
+		return await this.deleteData(filters);
+	}
+
+	public async changeMusic(musicId: number, newValues: IMusicChangeRequest) {
+		return await this.updateData(newValues, { musicId });
 	}
 }

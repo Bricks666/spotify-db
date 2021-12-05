@@ -1,10 +1,10 @@
 import { ITablePage } from "./Table";
 import { PoolConnection } from "mariadb";
-import { IAuthor, IAlbum } from ".";
-import { Request, URL } from "./common";
+import { IAuthor, IAlbum, FromRequest, Request, URL } from ".";
 
 export interface IMusics {
 	init(connection: PoolConnection | null): Promise<void>;
+
 	getMusics(): Promise<IMusic[]>;
 	getMusics(page: ITablePage): Promise<IMusic[]>;
 	getMusics(page: ITablePage, filters: IMusicRequest): Promise<IMusic[]>;
@@ -15,7 +15,10 @@ export interface IMusics {
 		page: ITablePage,
 		filters: IMusicRequest
 	): Promise<IMusicJoin[]>;
+
 	addMusic(music: IMusicCreateRequest): Promise<void>;
+
+	changeMusic(musicId: number, newValues: IMusicChangeRequest): Promise<void>;
 }
 
 export interface IMusic {
@@ -38,3 +41,9 @@ export interface IMusicCreateRequest extends Omit<IMusic, "musicId"> {}
 export interface IMusicStruct extends Required<IMusic> {}
 
 export interface IMusicRequest extends Request<IMusic> {}
+
+export interface IMusicDeleteRequest
+	extends Required<Pick<IMusicRequest, "musicId">> {}
+
+export interface IMusicChangeRequest
+	extends FromRequest<Omit<IMusicRequest, "musicId">> {}

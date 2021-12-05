@@ -1,5 +1,26 @@
 import { PoolConnection } from "mariadb";
 
+export interface ITable {
+	init(connection: PoolConnection | null): Promise<void>;
+
+	insertData<Request extends Object>(params: Request): Promise<void>;
+
+	updateData<Values extends Object, Filters extends Object>(
+		newValues: Values,
+		filters: Filters
+	): Promise<void>;
+
+	deleteData<Filters extends Object>(filters: Filters): Promise<void>;
+
+	selectData<Response>(): Promise<Response[]>;
+	selectData<Response>(page: ITablePage): Promise<Response[]>;
+	selectData<Response>(page: ITablePage, filters: Object): Promise<Response[]>;
+	selectData<Response>(
+		page: ITablePage,
+		filters: Object,
+		join: ITableJoin[]
+	): Promise<Response[]>;
+}
 export enum Tables {
 	USERS = "users",
 	AUTHORS = "authors",
@@ -36,8 +57,8 @@ export interface IForeignKey {
 
 export interface ITableConfig {
 	table: Tables;
-	safeCreating?: boolean;
 	fields: IField[];
+	safeCreating?: boolean;
 	foreignKeys?: IForeignKey[];
 }
 export interface ITablePage {
@@ -45,7 +66,7 @@ export interface ITablePage {
 	countOnPage: number;
 }
 
-export enum IJoinOperators {
+export enum JoinOperators {
 	LESS_THAN = "<",
 	EQUAL = "=",
 	MORE_THAN = ">",
@@ -58,24 +79,6 @@ export interface ITableJoin {
 }
 export interface IJoinExpression {
 	innerField: `${string}Id`;
-	operator: IJoinOperators;
+	operator: JoinOperators;
 	outerField: `${string}Id`;
-}
-
-export interface ITable {
-	init(connection: PoolConnection | null): Promise<void>;
-	insertData<Request extends Object>(params: Request): Promise<void>;
-	updateData<Values extends Object, Filters extends Object>(
-		newValues: Values,
-		filter?: Filters
-	): Promise<void>;
-	deleteData<Filters extends Object>(filter: Filters): Promise<void>;
-	selectData<Response>(): Promise<Response[]>;
-	selectData<Response>(page: ITablePage): Promise<Response[]>;
-	selectData<Response>(page: ITablePage, filters: Object): Promise<Response[]>;
-	selectData<Response>(
-		page: ITablePage,
-		filters: Object,
-		join: ITableJoin[]
-	): Promise<Response[]>;
 }

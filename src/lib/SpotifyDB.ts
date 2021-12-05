@@ -31,6 +31,7 @@ export class SpotifyDB implements ISpotifyDB {
 	public constructor(poolConfig: PoolConfig) {
 		this._pool = mariadb.createPool({
 			...poolConfig,
+			checkDuplicate: false,
 			initSql: ["CREATE DATABASE IF NOT EXISTS Spotify;", "USE Spotify;"],
 		});
 
@@ -63,7 +64,7 @@ export class SpotifyDB implements ISpotifyDB {
 		}
 	}
 
-	public disconnect(): void {
+	public disconnect() {
 		this._connection!.end();
 	}
 

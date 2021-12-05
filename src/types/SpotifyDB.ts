@@ -14,7 +14,10 @@ export interface ISpotifyDB {
 	readonly playlists: IPlaylists;
 	readonly albums: IAlbums;
 	readonly musicsToPlaylists: IMusicsToPlaylists;
+
 	disconnect(): void;
+
 	connect(): Promise<void>;
+
 	changeUser(user: string, password: string): Promise<void>;
 }

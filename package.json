@@ -1,5 +1,5 @@
 {
-	"name": "spotify",
+	"name": "ktep-spotify-db",
 	"version": "1.0.0",
 	"description": "",
 	"main": "./dist/index.js",
@@ -27,7 +27,8 @@
 		"ts-loader": "^9.2.6",
 		"typescript": "^4.5.2",
 		"webpack": "^5.65.0",
-		"webpack-cli": "^4.9.1"
+		"webpack-cli": "^4.9.1",
+		"webpack-node-externals": "^3.0.0"
 	},
 	"files": [
 		"dist"

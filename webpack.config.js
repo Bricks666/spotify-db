@@ -15,7 +15,7 @@ module.exports = {
 		library: {
 			type: "commonjs-module",
 		},
-		chunkFormat: "commonjs",
+		chunkFormat: "module",
 	},
 
 	resolve: {

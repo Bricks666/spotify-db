@@ -7,13 +7,16 @@ module.exports = {
 	optimization: {
 		minimize: false,
 	},
+	experiments: {
+		outputModule: true,
+	},
 	target: "node",
 	output: {
 		path: path.resolve(__dirname, "dist"),
 		filename: "index.js",
 		clean: true,
 		library: {
-			type: "commonjs-module",
+			type: "module",
 		},
 		chunkFormat: "module",
 	},

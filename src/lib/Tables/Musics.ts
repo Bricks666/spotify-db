@@ -1,32 +1,26 @@
 import {
-	Tables,
-	IMusics,
-	IMusicRequest,
-	IMusic,
-	ITablePage,
-	ITableJoin,
+	Table,
+	TableJoin,
 	JoinOperators,
-	IMusicJoin,
-	IMusicDeleteRequest,
-	IMusicChangeRequest,
-} from "./../../types/";
-import { musicsConfig } from "../configs";
-import { Table } from "./Table";
-import { logged } from "../decorators";
+	TableSelectRequestConfig,
+	TableFilter,
+} from "mariadb-table-wrapper";
+import { musicsConfig } from "../../configs";
+import {
+	MusicChangeInfoOptions,
+	MusicCreateOptions,
+	MusicJoinModel,
+	MusicModel,
+	PartialMusicModel,
+	PartialMusicToPlaylistJoinModel,
+} from "../../models";
+import { MusicsTable, Tables } from "./../../types/";
 
-export class Musics extends Table implements IMusics {
+export class Musics extends Table<MusicModel> implements MusicsTable {
+	private readonly join: TableJoin[];
 	public constructor() {
 		super(musicsConfig);
-	}
-
-	@logged()
-	public async getMusics(page?: ITablePage, filters?: IMusicRequest) {
-		return await this.selectData<IMusic>(page, filters);
-	}
-
-	@logged()
-	public async getMusicsJoin(page?: ITablePage, filters?: IMusicRequest) {
-		const join: ITableJoin[] = [
+		this.join = [
 			{
 				innerTable: Tables.MUSICS,
 				outerTable: Tables.AUTHORS,
@@ -50,18 +44,30 @@ export class Musics extends Table implements IMusics {
 				],
 			},
 		];
-		return await this.selectData<IMusicJoin>(page, filters, join);
 	}
 
-	public async addMusic(music: IMusic) {
-		await this.insertData<IMusic>(music);
+	public async addMusic(music: MusicCreateOptions) {
+		await this.insertData(music);
 	}
 
-	public async deleteMusics(filters: IMusicDeleteRequest) {
+	public async getMusics<Response extends PartialMusicModel = MusicModel>(
+		config?: TableSelectRequestConfig<MusicModel>
+	) {
+		return await this.selectData<Response>(config);
+	}
+
+	public async getMusicsJoin<
+		Response extends PartialMusicToPlaylistJoinModel = MusicJoinModel
+		/* TODO: В обертку нужно поставить ограничения на фильтр, чтобы проходили и расширяющие классы */
+	>(config?: TableSelectRequestConfig<MusicModel>) {
+		return await this.selectData<Response>({ ...config, join: this.join });
+	}
+
+	public async deleteMusics(filters: TableFilter<MusicModel>) {
 		return await this.deleteData(filters);
 	}
 
-	public async changeMusic(musicId: number, newValues: IMusicChangeRequest) {
+	public async changeMusic(musicId: number, newValues: MusicChangeInfoOptions) {
 		return await this.updateData(newValues, { musicId });
 	}
 }

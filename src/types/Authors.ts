@@ -1,30 +1,19 @@
-import { ITablePage } from "./Table";
 import { PoolConnection } from "mariadb";
-import { FromRequest, Request } from ".";
+import { TableFilter, TableSelectRequestConfig } from "mariadb-table-wrapper";
+import {
+	AuthorCreateOptions,
+	AuthorModel,
+	PartialAuthorModel,
+} from "src/models";
 
-export interface IAuthors {
+export interface AuthorsTable {
 	init(connection: PoolConnection | null): Promise<void>;
 
-	getAuthors(): Promise<IAuthor[]>;
-	getAuthors(page: ITablePage): Promise<IAuthor[]>;
-	getAuthors(page: ITablePage, filters: IAuthorRequest): Promise<IAuthor[]>;
+	getAuthors<Response extends PartialAuthorModel = AuthorModel>(
+		config?: TableSelectRequestConfig<AuthorModel>
+	): Promise<Response[]>;
 
-	addAuthor(author: IAuthorCreateRequest): Promise<void>;
+	addAuthor(author: AuthorCreateOptions): Promise<void>;
 
-	deleteAuthors(filters: IAuthorDeleteRequest): Promise<void>;
+	deleteAuthors(filters: TableFilter<AuthorModel>): Promise<void>;
 }
-
-export interface IAuthor {
-	authorId: number;
-	authorName: string;
-}
-
-export interface IAuthorRequest extends Request<IAuthor> {}
-
-export interface IAuthorCreateRequest extends Omit<IAuthor, "authorId"> {}
-
-export interface IAuthorDeleteRequest
-	extends Required<Pick<IAuthorRequest, "authorId">> {}
-
-export interface IAuthorChangeRequest
-	extends Omit<FromRequest<IAuthorRequest>, "authorId"> {}

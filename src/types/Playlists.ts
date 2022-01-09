@@ -1,47 +1,32 @@
 import { PoolConnection } from "mariadb";
-import { FromRequest, ITablePage, IUser, Request } from ".";
+import { TableFilter, TableSelectRequestConfig } from "mariadb-table-wrapper";
+import {
+	PartialPlaylistJoinModel,
+	PartialPlaylistModel,
+	PlaylistChangeInfoOptions,
+	PlaylistCreateOptions,
+	PlaylistJoinModel,
+	PlaylistModel,
+} from "src/models";
 
-export interface IPlaylists {
-	init(connection: PoolConnection | null): Promise<void>;
+export interface PlaylistsTable {
+	init(connection: PoolConnection): Promise<void>;
 
-	addPlaylist(playlist: IPlaylistCreateRequest): Promise<void>;
+	addPlaylist(playlist: PlaylistCreateOptions): Promise<void>;
 
-	getPlaylists(): Promise<IPlaylist[]>;
-	getPlaylists(page: ITablePage): Promise<IPlaylist[]>;
-	getPlaylists(
-		page: ITablePage,
-		filter: IPlaylistRequest
-	): Promise<IPlaylist[]>;
+	getPlaylists<Response extends PartialPlaylistModel = PlaylistModel>(
+		config?: TableSelectRequestConfig<PlaylistModel>
+	): Promise<Response[]>;
+	getPlaylistsJoin<
+		Response extends PartialPlaylistJoinModel = PlaylistJoinModel
+	>(
+		config?: TableSelectRequestConfig<PlaylistJoinModel>
+	): Promise<Response[]>;
 
-	getPlaylistsJoin(): Promise<IPlaylistJoin[]>;
-	getPlaylistsJoin(page: ITablePage): Promise<IPlaylistJoin[]>;
-	getPlaylistsJoin(
-		page: ITablePage,
-		filter: IPlaylistRequest
-	): Promise<IPlaylistJoin[]>;
+	deletePlaylists(filters: TableFilter<PlaylistModel>): Promise<void>;
 
-	deletePlaylists(filters: IPlaylistDeleteRequest): Promise<void>;
-
-	changePlaylist(
+	changePlaylistInfo(
 		playlistId: number,
-		newValues: IPlaylistChangeRequest
+		newValues: PlaylistChangeInfoOptions
 	): Promise<void>;
 }
-
-export interface IPlaylist {
-	playlistId: number;
-	playlistName: string;
-	userId: number;
-}
-
-export interface IPlaylistJoin extends IPlaylist, IUser {}
-
-export interface IPlaylistCreateRequest extends Omit<IPlaylist, "playlistId"> {}
-
-export interface IPlaylistRequest extends Request<IPlaylist> {}
-
-export interface IPlaylistDeleteRequest
-	extends Required<Pick<IPlaylistRequest, "playlistId">> {}
-
-export interface IPlaylistChangeRequest
-	extends Omit<FromRequest<IPlaylistRequest>, "playlistId" | "userId"> {}

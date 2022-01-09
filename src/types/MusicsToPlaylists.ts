@@ -1,42 +1,33 @@
-import { IMusic, IPlaylist, ITablePage, Request } from ".";
 import { PoolConnection } from "mariadb";
+import { TableFilter, TableSelectRequestConfig } from "mariadb-table-wrapper";
+import {
+	MusicToPlaylistCreateOptions,
+	MusicToPlaylistJoinModel,
+	MusicToPlaylistModel,
+	PartialMusicToPlaylistJoinModel,
+	PartialMusicToPlaylistModel,
+} from "src/models";
 
-export interface IMusicsToPlaylists {
-	init(connection: PoolConnection | null): Promise<void>;
+export interface MusicsToPlaylistsTable {
+	init(connection: PoolConnection): Promise<void>;
 
 	addMusicToPlaylist(
-		musicToPlaylist: IMusicToPlaylistCreateRequest
+		musicToPlaylist: MusicToPlaylistCreateOptions
 	): Promise<void>;
 
-	deleteMusicFromPlaylist(musicToPlaylist: IMusicToPlaylistDeleteRequest): Promise<void>;
+	getMusicsToPlaylists<
+		Response extends PartialMusicToPlaylistModel = MusicToPlaylistModel
+	>(
+		config?: TableSelectRequestConfig<MusicToPlaylistModel>
+	): Promise<Response[]>;
 
-	getMusicsToPlaylists(): Promise<IMusicToPlaylist[]>;
-	getMusicsToPlaylists(page: ITablePage): Promise<IMusicToPlaylist[]>;
-	getMusicsToPlaylists(
-		page: ITablePage,
-		filters: IMusicToPlaylistRequest
-	): Promise<IMusicToPlaylist[]>;
+	getMusicsToPlaylistsJoin<
+		Response extends PartialMusicToPlaylistJoinModel = MusicToPlaylistJoinModel
+	>(
+		config?: TableSelectRequestConfig<MusicToPlaylistJoinModel>
+	): Promise<Response[]>;
 
-	getMusicsToPlaylistsJoin(): Promise<IMusicToPlaylistJoin[]>;
-	getMusicsToPlaylistsJoin(page: ITablePage): Promise<IMusicToPlaylistJoin[]>;
-	getMusicsToPlaylistsJoin(
-		page: ITablePage,
-		filters: IMusicToPlaylistRequest
-	): Promise<IMusicToPlaylistJoin[]>;
+	deleteMusicFromPlaylist(
+		filters: TableFilter<MusicToPlaylistModel>
+	): Promise<void>;
 }
-export interface IMusicToPlaylist {
-	playlistId: number;
-	musicId: number;
-}
-
-export interface IMusicToPlaylistDeleteRequest
-	extends Required<IMusicToPlaylistRequest> {}
-
-export interface IMusicToPlaylistCreateRequest extends IMusicToPlaylist {}
-
-export interface IMusicToPlaylistRequest extends Request<IMusicToPlaylist> {}
-
-export interface IMusicToPlaylistJoin
-	extends IMusicToPlaylist,
-		IPlaylist,
-		IMusic {}

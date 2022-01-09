@@ -1,38 +1,40 @@
 import {
-	IAuthors,
-	IAuthor,
-	IAuthorRequest,
-	IAuthorCreateRequest,
-	ITablePage,
-	IAuthorDeleteRequest,
-	IAuthorChangeRequest,
-} from "../../types";
-import { Table } from "./Table";
-import { authorsConfig } from "../configs";
-import { logged } from "../decorators";
+	Table,
+	TableFilter,
+	TableSelectRequestConfig,
+} from "mariadb-table-wrapper";
+import {
+	AuthorChangeInfoOptions,
+	AuthorCreateOptions,
+	AuthorModel,
+	PartialAuthorModel,
+} from "../../models";
+import { authorsConfig } from "../../configs";
+import { AuthorsTable } from "../../types";
 
-export class Authors extends Table implements IAuthors {
+export class Authors extends Table<AuthorModel> implements AuthorsTable {
 	public constructor() {
 		super(authorsConfig);
 	}
 
-	@logged()
-	public async getAuthors(page?: ITablePage, filters?: IAuthorRequest) {
-		if (typeof filters !== "undefined") {
-			return await this.selectData<IAuthor>(page, filters);
-		}
-		return await this.selectData<IAuthor>(page);
+	public async addAuthor(author: AuthorCreateOptions) {
+		return await this.insertData(author);
 	}
 
-	public async addAuthor(author: IAuthorCreateRequest) {
-		return await this.insertData<IAuthorRequest>(author);
+	public async getAuthors<Response extends PartialAuthorModel = AuthorModel>(
+		config?: TableSelectRequestConfig<AuthorModel>
+	) {
+		return await this.selectData<Response>(config);
 	}
 
-	public async deleteAuthors(filters: IAuthorDeleteRequest) {
+	public async deleteAuthors(filters: TableFilter<AuthorModel>) {
 		return await this.deleteData(filters);
 	}
 
-	public async changeAuthor(authorId: number, newValues: IAuthorChangeRequest) {
+	public async changeAuthorInfo(
+		authorId: number,
+		newValues: AuthorChangeInfoOptions
+	) {
 		return await this.updateData(newValues, { authorId });
 	}
 }

@@ -1,35 +1,40 @@
 import {
-	IAlbums,
-	IAlbumRequest,
-	ITablePage,
-	IAlbum,
-	IAlbumCreateRequest,
-	IAlbumDeleteRequest,
-	IAlbumChangeRequest,
-} from "./../../types";
-import { albumsConfig } from "../configs";
-import { Table } from "./Table";
-import { logged } from "../decorators";
+	Table,
+	TableFilter,
+	TableSelectRequestConfig,
+} from "mariadb-table-wrapper";
+import {
+	AlbumChangeInfoOptions,
+	AlbumCreateOptions,
+	PartialAlbumModel,
+} from "./../../models/AlbumModel";
+import { AlbumModel } from "../../models";
+import { albumsConfig } from "../../configs";
+import { AlbumsTable } from "./../../types";
 
-export class Albums extends Table implements IAlbums {
+export class Albums extends Table<AlbumModel> implements AlbumsTable {
 	public constructor() {
 		super(albumsConfig);
 	}
 
-  @logged()
-	public async getAlbums(page?: ITablePage, filters?: IAlbumRequest) {
-		return await this.selectData<IAlbum>(page, filters);
+	public async addAlbum(album: AlbumCreateOptions) {
+		return await this.insertData(album);
 	}
 
-	public async addAlbum(album: IAlbumCreateRequest) {
-		return await this.insertData<IAlbumCreateRequest>(album);
+	public async getAlbums<Response extends PartialAlbumModel = AlbumModel>(
+		config?: TableSelectRequestConfig<AlbumModel>
+	) {
+		return await this.selectData<Response>(config);
 	}
 
-	public async deleteAlbum(filters: IAlbumDeleteRequest) {
+	public async deleteAlbum(filters: TableFilter<AlbumModel>) {
 		return await this.deleteData(filters);
 	}
 
-	public async changeAlbum(albumId: number, newValues: IAlbumChangeRequest) {
+	public async changeAlbumInfo(
+		albumId: number,
+		newValues: AlbumChangeInfoOptions
+	) {
 		return await this.updateData(newValues, { albumId });
 	}
 }

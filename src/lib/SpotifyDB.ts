@@ -1,11 +1,11 @@
 import {
 	ISpotifyDB,
-	IUsers,
-	IAuthors,
-	IMusics,
-	IAlbums,
-	IPlaylists,
-	IMusicsToPlaylists,
+	UsersTable,
+	AuthorsTable,
+	MusicsTable,
+	AlbumsTable,
+	PlaylistsTable,
+	MusicsToPlaylistsTable,
 } from "../types";
 import mariadb, { Pool, PoolConfig, PoolConnection } from "mariadb";
 import {
@@ -21,12 +21,12 @@ export class SpotifyDB implements ISpotifyDB {
 	private readonly _pool: Pool;
 	private _connection: PoolConnection | null;
 
-	public readonly users: IUsers;
-	public readonly authors: IAuthors;
-	public readonly musics: IMusics;
-	public readonly albums: IAlbums;
-	public readonly playlists: IPlaylists;
-	public readonly musicsToPlaylists: IMusicsToPlaylists;
+	public readonly users: UsersTable;
+	public readonly authors: AuthorsTable;
+	public readonly musics: MusicsTable;
+	public readonly albums: AlbumsTable;
+	public readonly playlists: PlaylistsTable;
+	public readonly musicsToPlaylists: MusicsToPlaylistsTable;
 
 	public constructor(poolConfig: PoolConfig) {
 		this._pool = mariadb.createPool({
@@ -57,18 +57,18 @@ export class SpotifyDB implements ISpotifyDB {
 			this.musicsToPlaylists,
 		];
 
-		if (typeof this._connection !== "undefined") {
-			tables.map((table) => table.init(this._connection));
+		const inits = tables.map((table) =>
+			table.init(this._connection as PoolConnection)
+		);
 
-			await Promise.all(tables);
-		}
+		await Promise.all(inits);
 	}
 
 	public disconnect() {
-		this._connection!.end();
+		this._connection?.end();
 	}
 
 	public async changeUser(user: string, password: string) {
-		await this._connection!.changeUser({ user, password });
+		await this._connection?.changeUser({ user, password });
 	}
 }

@@ -1,49 +1,28 @@
-import { ITablePage } from "./Table";
 import { PoolConnection } from "mariadb";
-import { IAuthor, IAlbum, FromRequest, Request, URL } from ".";
+import { TableSelectRequestConfig } from "mariadb-table-wrapper";
+import {
+	MusicChangeInfoOptions,
+	MusicCreateOptions,
+	MusicJoinModel,
+	MusicModel,
+	PartialMusicModel,
+} from "src/models";
 
-export interface IMusics {
+export interface MusicsTable {
 	init(connection: PoolConnection | null): Promise<void>;
 
-	getMusics(): Promise<IMusic[]>;
-	getMusics(page: ITablePage): Promise<IMusic[]>;
-	getMusics(page: ITablePage, filters: IMusicRequest): Promise<IMusic[]>;
+	addMusic(music: MusicCreateOptions): Promise<void>;
+
+	getMusics<Response extends PartialMusicModel = MusicModel>(
+		config?: TableSelectRequestConfig<MusicModel>
+	): Promise<Response[]>;
 	/* Может быть можно как то свести с функцией getMusics */
-	getMusicsJoin(): Promise<IMusicJoin[]>;
-	getMusicsJoin(page: ITablePage): Promise<IMusicJoin[]>;
-	getMusicsJoin(
-		page: ITablePage,
-		filters: IMusicRequest
-	): Promise<IMusicJoin[]>;
+	getMusicsJoin<Response extends PartialMusicModel = MusicJoinModel>(
+		config?: TableSelectRequestConfig<MusicModel>
+	): Promise<Response[]>;
 
-	addMusic(music: IMusicCreateRequest): Promise<void>;
-
-	changeMusic(musicId: number, newValues: IMusicChangeRequest): Promise<void>;
+	changeMusic(
+		musicId: number,
+		newValues: MusicChangeInfoOptions
+	): Promise<void>;
 }
-
-export interface IMusic {
-	musicId: number;
-	musicName: string;
-	authorId: number;
-	durationSec: number;
-	musicURL: URL;
-	musicPhoto?: URL;
-	albumId?: number;
-}
-
-export interface IMusicJoin
-	extends Omit<IMusic, "albumId" | "authorId">,
-		IAuthor,
-		IAlbum {}
-
-export interface IMusicCreateRequest extends Omit<IMusic, "musicId"> {}
-
-export interface IMusicStruct extends Required<IMusic> {}
-
-export interface IMusicRequest extends Request<IMusic> {}
-
-export interface IMusicDeleteRequest
-	extends Required<Pick<IMusicRequest, "musicId">> {}
-
-export interface IMusicChangeRequest
-	extends FromRequest<Omit<IMusicRequest, "musicId">> {}

@@ -1,19 +1,19 @@
 import {
-	IAlbums,
-	IAuthors,
-	IMusics,
-	IMusicsToPlaylists,
-	IPlaylists,
-	IUsers,
+	AlbumsTable,
+	AuthorsTable,
+	MusicsTable,
+	MusicsToPlaylistsTable,
+	PlaylistsTable,
+	UsersTable,
 } from ".";
 
 export interface ISpotifyDB {
-	readonly users: IUsers;
-	readonly authors: IAuthors;
-	readonly musics: IMusics;
-	readonly playlists: IPlaylists;
-	readonly albums: IAlbums;
-	readonly musicsToPlaylists: IMusicsToPlaylists;
+	readonly users: UsersTable;
+	readonly authors: AuthorsTable;
+	readonly musics: MusicsTable;
+	readonly playlists: PlaylistsTable;
+	readonly albums: AlbumsTable;
+	readonly musicsToPlaylists: MusicsToPlaylistsTable;
 
 	disconnect(): void;
 

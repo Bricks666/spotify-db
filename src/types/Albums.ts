@@ -1,32 +1,25 @@
 import { PoolConnection } from "mariadb";
-import { FromRequest, ITablePage } from ".";
-import { Request, URL } from "./common";
+import { TableFilter, TableSelectRequestConfig } from "mariadb-table-wrapper";
+import {
+	AlbumChangeInfoOptions,
+	AlbumCreateOptions,
+	AlbumModel,
+	PartialAlbumModel,
+} from "src/models";
 
-export interface IAlbums {
-	init(connection: PoolConnection | null): Promise<void>;
+export interface AlbumsTable {
+	init(connection: PoolConnection): Promise<void>;
 
-	addAlbum(album: IAlbumCreateRequest): Promise<void>;
+	addAlbum(album: AlbumCreateOptions): Promise<void>;
 
-	getAlbums(): Promise<IAlbum[]>;
-	getAlbums(page: ITablePage): Promise<IAlbum[]>;
-	getAlbums(page: ITablePage, filters: IAlbumRequest): Promise<IAlbum[]>;
+	getAlbums<Response extends PartialAlbumModel = AlbumModel>(
+		config?: TableSelectRequestConfig<AlbumModel>
+	): Promise<Response[]>;
 
-	deleteAlbum(filters: IAlbumDeleteRequest): Promise<void>;
+	deleteAlbum(filters: TableFilter<AlbumModel>): Promise<void>;
 
-	changeAlbum(albumId: number, newValues: IAlbumChangeRequest): Promise<void>;
+	changeAlbumInfo(
+		albumId: number,
+		newValues: AlbumChangeInfoOptions
+	): Promise<void>;
 }
-
-export interface IAlbum {
-	albumId: number;
-	albumName: string;
-	albumPhoto?: URL;
-}
-export interface IAlbumCreateRequest extends Omit<IAlbum, "albumId"> {}
-
-export interface IAlbumRequest extends Request<IAlbum> {}
-
-export interface IAlbumDeleteRequest
-	extends Required<Pick<IAlbumRequest, "albumId">> {}
-
-export interface IAlbumChangeRequest
-	extends Omit<FromRequest<IAlbumRequest>, "albumId"> {}

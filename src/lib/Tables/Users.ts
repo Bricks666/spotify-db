@@ -1,46 +1,32 @@
-import { Table } from "./Table";
 import {
-	IUsers,
-	IUser,
-	IUserRequest,
-	IUserCreateRequest,
-	ITablePage,
-	IUserLoginRequest,
-	IUserDeleteRequest,
-	IUserChangeRequest,
-} from "../../types";
-import { usersConfig } from "../configs";
-import { logged, tryCatch } from "../decorators";
+	Table,
+	TableFilter,
+	TableSelectRequestConfig,
+} from "mariadb-table-wrapper";
+import { usersConfig } from "../../configs";
+import { PartialUserModel, UserCreateOptions, UserModel } from "../../models";
+import { UsersTable } from "../../types";
 
-export class Users extends Table implements IUsers {
+export class Users extends Table<UserModel> implements UsersTable {
 	public constructor() {
 		super(usersConfig);
 	}
 
-	@tryCatch()
-	@logged()
-	public async addUser(user: IUserCreateRequest) {
+	public async addUser(user: UserCreateOptions) {
 		return await this.insertData(user);
 	}
 
-	@tryCatch()
-	@logged()
-	public async getUsers(page?: ITablePage, filters?: IUserRequest) {
-		return await this.selectData<IUser>(page, filters);
+	public async getUsers<Response extends PartialUserModel = UserModel>(
+		config?: TableSelectRequestConfig<UserModel>
+	) {
+		return await this.selectData<Response>(config);
 	}
 
-	public async deleteUsers(filters: IUserDeleteRequest) {
+	public async deleteUsers(filters: TableFilter<UserModel>) {
 		return await this.deleteData(filters);
 	}
 
-	@tryCatch()
-	public async changeUserData(userId: number, newValues: IUserChangeRequest) {
+	public async changeUserInfo(userId: number, newValues: UserCreateOptions) {
 		return await this.updateData(newValues, { userId });
-	}
-
-	@logged()
-	public async login(loginParams: IUserLoginRequest) {
-		const result = await this.selectData<IUser>(undefined, loginParams);
-		return result.length === 1;
 	}
 }

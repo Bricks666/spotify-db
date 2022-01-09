@@ -1,35 +1,25 @@
 import { PoolConnection } from "mariadb";
-import { ITablePage, Request } from ".";
+import { TableFilter, TableSelectRequestConfig } from "mariadb-table-wrapper";
+import {
+	PartialUserModel,
+	UserChangeInfoOptions,
+	UserCreateOptions,
+	UserModel,
+} from "src/models";
 
-export interface IUsers {
-	init(connection: PoolConnection | null): Promise<void>;
+export interface UsersTable {
+	init(connection: PoolConnection): Promise<void>;
 
-	addUser(user: IUserCreateRequest): Promise<void>;
+	addUser(user: UserCreateOptions): Promise<void>;
 
-	getUsers(): Promise<IUser[]>;
-	getUsers(page?: ITablePage): Promise<IUser[]>;
-	getUsers(page?: ITablePage, filters?: IUserRequest): Promise<IUser[]>;
+	getUsers<Response extends PartialUserModel = UserModel>(
+		config?: TableSelectRequestConfig<UserModel>
+	): Promise<Response[]>;
 
-	deleteUsers(filters: IUserDeleteRequest): Promise<void>;
+	deleteUsers(filters: TableFilter<UserModel>): Promise<void>;
 
-	login(loginParams: IUserLoginRequest): Promise<boolean>;
-
-	changeUserData(userId: number, newValues: IUserChangeRequest): Promise<void>;
+	changeUserInfo(
+		userId: number,
+		newValues: UserChangeInfoOptions
+	): Promise<void>;
 }
-
-export interface IUser {
-	userId: number;
-	login: string;
-	password: string;
-}
-
-export interface IUserRequest extends Request<Omit<IUser, "password">> {}
-
-export interface IUserCreateRequest extends Omit<IUser, "userId"> {}
-
-export interface IUserLoginRequest extends Omit<IUser, "userId"> {}
-
-export interface IUserChangeRequest extends Partial<Omit<IUser, "userId">> {}
-
-export interface IUserDeleteRequest
-	extends Required<Pick<IUserRequest, "userId">> {}

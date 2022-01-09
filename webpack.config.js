@@ -16,7 +16,7 @@ module.exports = {
 		filename: "index.js",
 		clean: true,
 		library: {
-			type: "umd",
+			type: "umd2",
 		},
 		chunkFormat: "module",
 	},

@@ -5,7 +5,7 @@ import {
 	AlbumCreateOptions,
 	AlbumModel,
 	PartialAlbumModel,
-} from "src/models";
+} from "../models";
 
 export interface AlbumsTable {
 	init(connection: PoolConnection): Promise<void>;

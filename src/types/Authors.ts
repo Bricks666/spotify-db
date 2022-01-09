@@ -4,7 +4,7 @@ import {
 	AuthorCreateOptions,
 	AuthorModel,
 	PartialAuthorModel,
-} from "src/models";
+} from "../models";
 
 export interface AuthorsTable {
 	init(connection: PoolConnection | null): Promise<void>;

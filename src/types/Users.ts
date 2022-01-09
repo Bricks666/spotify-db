@@ -5,7 +5,7 @@ import {
 	UserChangeInfoOptions,
 	UserCreateOptions,
 	UserModel,
-} from "src/models";
+} from "../models";
 
 export interface UsersTable {
 	init(connection: PoolConnection): Promise<void>;

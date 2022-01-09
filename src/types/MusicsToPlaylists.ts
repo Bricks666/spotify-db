@@ -6,7 +6,7 @@ import {
 	MusicToPlaylistModel,
 	PartialMusicToPlaylistJoinModel,
 	PartialMusicToPlaylistModel,
-} from "src/models";
+} from "../models";
 
 export interface MusicsToPlaylistsTable {
 	init(connection: PoolConnection): Promise<void>;

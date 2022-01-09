@@ -6,7 +6,7 @@ import {
 	MusicJoinModel,
 	MusicModel,
 	PartialMusicModel,
-} from "src/models";
+} from "../models";
 
 export interface MusicsTable {
 	init(connection: PoolConnection | null): Promise<void>;

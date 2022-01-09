@@ -1,3 +1,4 @@
+import mariadb, { Pool, PoolConfig, PoolConnection } from "mariadb";
 import {
 	ISpotifyDB,
 	UsersTable,
@@ -7,7 +8,6 @@ import {
 	PlaylistsTable,
 	MusicsToPlaylistsTable,
 } from "../types";
-import mariadb, { Pool, PoolConfig, PoolConnection } from "mariadb";
 import {
 	Users,
 	Authors,

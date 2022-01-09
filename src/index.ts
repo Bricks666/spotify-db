@@ -5,7 +5,7 @@ const bd = new SpotifyDB({ user: "root", password: "Root123" });
 const start = async () => {
 	try {
 		await bd.connect();
-		await bd.users.addUser({ login: "asd", password: "asd" });
+		await bd.users.addUser({ login: "asasdasdd", password: "asd" });
 		const users = await bd.users.getUsers({
 			filters: {
 				login: ["asd"],

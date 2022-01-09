@@ -13,8 +13,7 @@ module.exports = {
 		filename: "index.js",
 		clean: true,
 		library: {
-			name: "ktepSpotifyDb",
-			type: "var",
+			type: "commonjs-module",
 		},
 		chunkFormat: "module",
 	},
